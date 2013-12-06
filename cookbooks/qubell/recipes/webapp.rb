@@ -91,10 +91,17 @@ link "#{node['tomcat']['context_dir']}/ROOT.xml" do
   to "/tmp/webapp.xml"
 end
 
-service "tomcat6" do
-  action :stop
-end
+case node['platform']
+when "centos","redhat","fedora"
+  service "tomcat6" do
+    action :stop
+  end
 
-service "tomcat6" do
-  action :start
+  service "tomcat6" do
+    action :start
+  end
+when "debian","ubuntu"
+  service "tomcat6" do
+    action :restart
+  end
 end
