@@ -14,3 +14,8 @@ template "/etc/haproxy/haproxy.cfg" do
   )
   notifies :restart, "service[haproxy]"
 end
+
+case node['platform']
+when "centos","redhat","fedora"
+  execute "iptables -F"
+end

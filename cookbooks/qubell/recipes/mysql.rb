@@ -80,3 +80,8 @@ require 'net/https'
     retries 3
   end
 end
+
+case node['platform']
+when "centos","redhat","fedora"
+  execute "iptables -F"
+end

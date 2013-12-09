@@ -1,4 +1,5 @@
-if node['platform'] == "centos"
+case node['platform']
+when "centos","redhat","fedora"
   include_recipe "yum::yum"
   include_recipe "yum::epel"
 
@@ -20,8 +21,9 @@ end
 
 include_recipe 'git'
 
-if node['platform'] == "centos"
-  remote_file "/usr/share/tomcat6/lib/mysql-connector.jar" do
+case node['platform']
+when "centos","redhat","fedora"
+  remote_file "#{node["tomcat"]["home"]}/lib/mysql-connector.jar" do
     source "http://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar"
     owner 'root'
     group 'root'
@@ -29,7 +31,7 @@ if node['platform'] == "centos"
   end
 
   if node['platform_version'].to_f > 6.0
-    remote_file "/usr/share/tomcat6/lib/tomcat-dbcp.jar" do
+    remote_file "#{node["tomcat"]["home"]}/lib/tomcat-dbcp.jar" do
       source "http://repo1.maven.org/maven2/org/apache/tomcat/dbcp/6.0.26/dbcp-6.0.26.jar"
       owner 'root'
       group 'root'
@@ -93,15 +95,17 @@ end
 
 case node['platform']
 when "centos","redhat","fedora"
-  service "tomcat6" do
+  execute "iptables -F"
+
+  service "tomcat#{node["tomcat"]["base_version"]}" do
     action :stop
   end
 
-  service "tomcat6" do
+  service "tomcat#{node["tomcat"]["base_version"]}" do
     action :start
   end
 when "debian","ubuntu"
-  service "tomcat6" do
+  service "tomcat#{node["tomcat"]["base_version"]}" do
     action :restart
   end
 end
