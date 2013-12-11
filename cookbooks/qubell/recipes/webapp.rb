@@ -56,7 +56,7 @@ case node['scm']['provider']
 end
 
 execute "package" do
-  command "cd /tmp/webapp; mvn clean package && cp /tmp/webapp/target/*.war /tmp/webapp.war"
+  command "cd /tmp/webapp; mvn clean package -Dmaven.test.skip=true && cp /tmp/webapp/target/*.war /tmp/webapp.war"
 end
 
 
