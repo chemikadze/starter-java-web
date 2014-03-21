@@ -17,5 +17,5 @@ end
 
 case node['platform']
 when "centos","redhat","fedora"
-  execute "iptables -F"
+  execute "if [ -e '/sbin/iptables' ]; then bash -c '/etc/init.d/iptables stop'; else echo $?; fi"
 end

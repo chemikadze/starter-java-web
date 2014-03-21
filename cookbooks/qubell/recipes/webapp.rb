@@ -9,14 +9,7 @@ when "centos","redhat","fedora"
 end
 
 if node['scm']['provider'] == "git" or node['scm']['provider'] == "subversion"
-  if node['platform'] == "centos" && node['platform_version'].to_f > 6.0
-    include_recipe "ark"
-    include_recipe "maven::maven2"
-  else
-    package "maven2" do
-      action :install
-    end
-  end
+  include_recipe "maven"
 end
 
 include_recipe 'git'
@@ -95,7 +88,7 @@ end
 
 case node['platform']
 when "centos","redhat","fedora"
-  execute "iptables -F"
+  execute "if [ -e '/sbin/iptables' ]; then bash -c '/etc/init.d/iptables stop'; else echo $?; fi"
 
   service "tomcat#{node["tomcat"]["base_version"]}" do
     action :stop
