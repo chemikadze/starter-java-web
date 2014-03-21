@@ -33,8 +33,10 @@ launch:
                 roleName: db-node
                 os: "{$.os}"
                 vmIdentity: "{$.identity}"
+                collectLogs: ["/var/log/mysqld.log", "/var/log/mysql/*"]
             output:
                  db-hosts: privateips
+                 logging-dashboard: logging-dashboard
 
         - app-tier:
             action: .compute.grow
@@ -44,6 +46,7 @@ launch:
                 quantity: "{$.app-tier-size}"
                 os: "{$.os}"
                 vmIdentity: "{$.identity}"
+                collectLogs: ["/var/log/tomcat6/catalana.out", "/var/log/tomcat6/*.log"]
             output:
                 app-hosts: ips
 
@@ -97,10 +100,13 @@ launch:
             value: "{$.lb-hosts}"
         app-url:
             description: Url to the application
-            value: "http://{$.lb-tier~hosts[0]}"
+            value: "http://{$.lb-tier~provision-vms~ips[0]}"
         haproxy-url:
             description: Url to haproxy stats
-            value: "http://{$.lb-tier~hosts[0]}:22002/"
+            value: "http://{$.lb-tier~provision-vms~ips[0]}:22002/"
+        kibana-logging-dashboard:
+            description: Logging Dashboard for instance
+            value: "{$.logging-dashboard}"
 
 scale-up:
     parameters:
@@ -204,9 +210,12 @@ destroy:
         default: undefined
     - vmIdentity:
         default: undefined
+    - collectLogs:
+        type: list
+        default: []
   steps:
     provision-vms:
-      action: provisionVms
+      action: provisionVmsWithLogging
       parameters:
          roleName: "{$.roleName}"
          hardwareId: m1.small
@@ -224,11 +233,22 @@ destroy:
       output:
          hosts: ips
          privateips: privateips
+         logging-dashboard: logging-dashboard
+
+    add-user-logging:
+      action: registerLogPath
+      precedingPhases: [provision-vms]
+      parameters:
+          roles: ['{$.roleName}']
+          paths: '{$.collectLogs}'
+
   return:
     ips:
       value: "{$.hosts}"
     privateips:
       value: "{$.privateips}"
+    logging-dashboard: # should not be needed after UI integration
+      value: "{$.logging-dashboard}"
 
 .deploy.db:
   parameters:
