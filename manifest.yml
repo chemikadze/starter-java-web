@@ -1,3 +1,9 @@
+version: "1.1"
+header:
+  services:
+    logger:
+      logger-server:   consume-signal(string)
+
 launch:
     parameters:
         - app-tier-size:
