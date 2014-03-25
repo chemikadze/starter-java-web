@@ -17,6 +17,18 @@
 # limitations under the License.
 #
 
+case node[:platform]
+when "redhat", "centos"
+  execute "yum clean all && yum -q makecache" do
+  end
+  #reload internal Chef yum cache
+  ruby_block "reload-internal-yum-cache" do
+    block do
+      Chef::Provider::Package::Yum::YumCache.instance.reload
+    end
+  end
+end
+
 package "haproxy" do
   action :install
 end
